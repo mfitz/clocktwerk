@@ -35,9 +35,9 @@ import twitter4j.TwitterFactory;
 
 public class TweetDaemon {
 	
-	//default to an hour between tweets
+	// default to 6 hours between tweets
 	private static final long DEFAULT_TWEET_INTERVAL_MILLISECONDS = 
-		1000 * 60 * 60; 
+		1000 * 60 * 60 * 6; 
 	private static final String TWEET_INTERVAL_PROPERTY = 
 		"tweetdaemon.tweetinterval.milliseconds";
 	
