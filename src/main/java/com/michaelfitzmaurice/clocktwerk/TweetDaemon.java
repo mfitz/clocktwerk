@@ -62,7 +62,7 @@ public class TweetDaemon {
 		LOG.debug("Looking for tweets file...");
 		URL tweetFileUrl = 
 			new Object().getClass().getResource("/tweets.txt");
-		LOG.debug("Found for tweets file at {}", tweetFileUrl);
+		LOG.debug("Found tweets file at {}", tweetFileUrl);
 		File tweetFile = new File( tweetFileUrl.getPath() );
 		BufferedReader reader = 
 			new BufferedReader( new FileReader(tweetFile) );
@@ -106,10 +106,10 @@ public class TweetDaemon {
 		ScheduledExecutorService scheduler = 
 			Executors.newScheduledThreadPool(1);
 		scheduler.scheduleAtFixedRate( getTweetRunnable(), 
-										getTweetInterval(), 
+										0, 
 										getTweetInterval(), 
 										TimeUnit.MILLISECONDS);
-		LOG.debug( "Daemon started to tweet every {} ms", getTweetInterval() );
+		LOG.debug("Daemon started; tweeting every {} ms", getTweetInterval() );
 	}
 	
 	private Runnable getTweetRunnable() {
@@ -126,9 +126,11 @@ public class TweetDaemon {
 				
 				String tweet = tweets.get(tweetIndex);
 				try {
-					LOG.debug("Sending tweet number {}: '{}'", 
-								tweetIndex, 
-								tweet);
+					LOG.debug("Sending tweet number {} as user {}: '{}'", 
+							new Object[] {
+					            tweetIndex,
+    							twitter.getOAuthAccessToken().getUserId(),
+    							tweet});
 					twitter.updateStatus(tweet);
 				} catch (TwitterException e) {
 					// swallow
