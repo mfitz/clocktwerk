@@ -1,3 +1,18 @@
+/**
+ *    Copyright 2012 Michael Fitzmaurice
+ * 
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package com.michaelfitzmaurice.clocktwerk;
 
 import java.io.BufferedReader;
@@ -43,6 +58,7 @@ public class TweetDaemon {
 		
 		ArrayList<String> tweetList = new ArrayList<String>();
 		
+		// TODO - make tweet file location a sys prop
 		LOG.debug("Looking for tweets file...");
 		URL tweetFileUrl = 
 			new Object().getClass().getResource("/tweets.txt");
@@ -68,11 +84,13 @@ public class TweetDaemon {
 	private Twitter authenticateToTwitter() throws IOException {
 		
 		LOG.debug("Setting up Twitter client...");
+		// TODO - add support for multiple accounts
+		// TODO - make twitter4j.properties location a sys prop
 		Twitter twitter = new TwitterFactory().getInstance();
 		if (twitter.getAuthorization().isEnabled() == false) {
 			String msg = 
 				"Not authenticated to twitter - check OAuth consumer " 
-				+ "key/secret intwitter4j.properties";
+				+ "key/secret in twitter4j.properties file";
 			LOG.error(msg);
 			throw new IOException(msg);
 		}
@@ -84,6 +102,7 @@ public class TweetDaemon {
 	public void start() {
 		
 		LOG.debug("Starting tweet daemon...");
+		// TODO - schedule a job per user account
 		ScheduledExecutorService scheduler = 
 			Executors.newScheduledThreadPool(1);
 		scheduler.scheduleAtFixedRate( getTweetRunnable(), 
@@ -99,10 +118,16 @@ public class TweetDaemon {
 
 			@Override
 			public void run() {
+				if ( ++tweetIndex == tweets.size() ) {
+					LOG.info("Reached the end of the tweet file; starting " 
+								+ "from the beginning again");
+					tweetIndex = 0;
+				}
+				
 				String tweet = tweets.get(tweetIndex);
 				try {
 					LOG.debug("Sending tweet number {}: '{}'", 
-								tweetIndex++, 
+								tweetIndex, 
 								tweet);
 					twitter.updateStatus(tweet);
 				} catch (TwitterException e) {
