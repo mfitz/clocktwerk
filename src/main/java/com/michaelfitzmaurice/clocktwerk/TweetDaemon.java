@@ -45,7 +45,7 @@ public class TweetDaemon {
 		LoggerFactory.getLogger(TweetDaemon.class);
 	
 	private List<String> tweets;
-	private int tweetIndex;
+	private int tweetIndex = -1;
 	private Twitter twitter;
 	
 	public TweetDaemon() throws IOException {
