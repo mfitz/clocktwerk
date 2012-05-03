@@ -59,22 +59,22 @@ public class TweetDaemon {
 		ArrayList<String> tweetList = new ArrayList<String>();
 		
 		// TODO - make tweet file location a sys prop
-		LOG.debug("Looking for tweets file...");
+		LOG.info("Looking for tweets file...");
 		URL tweetFileUrl = 
 			new Object().getClass().getResource("/tweets.txt");
-		LOG.debug("Found tweets file at {}", tweetFileUrl);
+		LOG.info("Found tweets file at {}", tweetFileUrl);
 		File tweetFile = new File( tweetFileUrl.getPath() );
 		BufferedReader reader = 
 			new BufferedReader( new FileReader(tweetFile) );
 		
-		LOG.debug("Parsing tweets from file at {}", tweetFileUrl);
+		LOG.info("Parsing tweets from file at {}", tweetFileUrl);
 		String line = reader.readLine();
 		while (line != null) {
 			tweetList.add( line.trim() );
 			line = reader.readLine();
 		}
 		reader.close();
-		LOG.debug("Parsed {} tweets from file at {}", 
+		LOG.info("Parsed {} tweets from file at {}", 
 					tweetList.size(), 
 					tweetFileUrl);
 		
@@ -83,7 +83,7 @@ public class TweetDaemon {
 	
 	private Twitter authenticateToTwitter() throws IOException {
 		
-		LOG.debug("Setting up Twitter client...");
+		LOG.info("Setting up Twitter client...");
 		// TODO - add support for multiple accounts
 		// TODO - make twitter4j.properties location a sys prop
 		Twitter twitter = new TwitterFactory().getInstance();
@@ -94,14 +94,14 @@ public class TweetDaemon {
 			LOG.error(msg);
 			throw new IOException(msg);
 		}
-		LOG.debug("Twitter client connected and authenticated");
+		LOG.info("Twitter client connected and authenticated");
         
         return twitter;
 	}
 
 	public void start() {
 		
-		LOG.debug("Starting tweet daemon...");
+		LOG.info("Starting tweet daemon...");
 		// TODO - schedule a job per user account
 		ScheduledExecutorService scheduler = 
 			Executors.newScheduledThreadPool(1);
@@ -109,7 +109,7 @@ public class TweetDaemon {
 										0, 
 										getTweetInterval(), 
 										TimeUnit.MILLISECONDS);
-		LOG.debug("Daemon started; tweeting every {} ms", getTweetInterval() );
+		LOG.info("Daemon started; tweeting every {} ms", getTweetInterval() );
 	}
 	
 	private Runnable getTweetRunnable() {
@@ -126,7 +126,7 @@ public class TweetDaemon {
 				
 				String tweet = tweets.get(tweetIndex);
 				try {
-					LOG.debug("Sending tweet number {} as user {}: '{}'", 
+					LOG.info("Sending tweet number {} as user {}: '{}'", 
 							new Object[] {
 					            tweetIndex,
     							twitter.getOAuthAccessToken().getUserId(),
