@@ -35,6 +35,9 @@ import twitter4j.TwitterFactory;
 
 public class TweetDaemon {
 	
+    private static final int MAX_TWEET_LENGTH = 140;
+    private static final int INITIAL_TWEET_INDEX = 0;
+    
 	// default to 6 hours between tweets
 	private static final long DEFAULT_TWEET_INTERVAL_MILLISECONDS = 
 		1000 * 60 * 60 * 6; 
@@ -45,8 +48,9 @@ public class TweetDaemon {
 		LoggerFactory.getLogger(TweetDaemon.class);
 	
 	private List<String> tweets;
-	private int tweetIndex = -1;
+	private int tweetIndex = INITIAL_TWEET_INDEX;
 	private Twitter twitter;
+	private int tweetsPosted;
 	
 	public TweetDaemon() throws IOException {
 		
@@ -68,11 +72,21 @@ public class TweetDaemon {
 			new BufferedReader( new FileReader(tweetFile) );
 		
 		LOG.info("Parsing tweets from file at {}", tweetFileUrl);
+		int lineNumber = 0;
 		String line = reader.readLine();
 		while (line != null) {
-			tweetList.add( line.trim() );
+		    lineNumber++;
+		    String tweet = line.trim();
+			if (tweet.length() > MAX_TWEET_LENGTH) {
+			    LOG.warn("Tweet on line {} > {} characters - ignoring...", 
+			            lineNumber,
+			            MAX_TWEET_LENGTH);
+			} else {
+			    tweetList.add(tweet);
+			}
 			line = reader.readLine();
 		}
+		
 		reader.close();
 		LOG.info("Parsed {} tweets from file at {}", 
 					tweetList.size(), 
@@ -118,10 +132,10 @@ public class TweetDaemon {
 
 			@Override
 			public void run() {
-				if ( ++tweetIndex == tweets.size() ) {
+				if ( tweetIndex == tweets.size() ) {
 					LOG.info("Reached the end of the tweet file; starting " 
 								+ "from the beginning again");
-					tweetIndex = 0;
+					tweetIndex = INITIAL_TWEET_INDEX;
 				}
 				
 				String tweet = tweets.get(tweetIndex);
@@ -132,6 +146,9 @@ public class TweetDaemon {
     							twitter.getOAuthAccessToken().getUserId(),
     							tweet});
 					twitter.updateStatus(tweet);
+					tweetIndex++;
+					tweetsPosted++;
+					LOG.info("Posted {} tweets since startup", tweetsPosted);
 				} catch (TwitterException e) {
 					// swallow
 					LOG.warn("Failed to send tweet", e);
