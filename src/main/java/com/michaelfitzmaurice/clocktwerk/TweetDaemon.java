@@ -66,6 +66,10 @@ public class TweetDaemon {
 		LOG.info("Looking for tweets file...");
 		URL tweetFileUrl = 
 			new Object().getClass().getResource("/tweets.txt");
+		if (tweetFileUrl == null) {
+		    throw new IOException("No tweets.txt file found on the classpath");
+		}
+		
 		LOG.info("Found tweets file at {}", tweetFileUrl);
 		File tweetFile = new File( tweetFileUrl.getPath() );
 		BufferedReader reader = 
