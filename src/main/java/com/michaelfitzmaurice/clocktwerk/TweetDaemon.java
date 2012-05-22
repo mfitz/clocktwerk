@@ -33,6 +33,10 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 
+/**
+ * 
+ * @author Michael Fitzmaurice https://github.com/mfitz
+ */
 public class TweetDaemon {
 	
     private static final int MAX_TWEET_LENGTH = 140;

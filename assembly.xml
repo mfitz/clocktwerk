@@ -23,6 +23,7 @@
 			<fileMode>0755</fileMode>
 			<includes>
 				<include>tweet-daemon.sh</include>
+				<include>oauth.sh</include>
 			</includes>
 		</fileSet>
 
@@ -43,8 +44,18 @@
 				<include>*.jar</include>
 			</includes>
 		</fileSet>
-		
+
 	</fileSets>
 	
+	<files>
+		<file>
+			<source>${project.basedir}/src/main/resources/twitter4j-skeleton.properties</source>
+			<outputDirectory>.</outputDirectory>
+			<destName>twitter4j.properties</destName>
+			<fileMode>0755</fileMode>
+			<lineEnding>keep</lineEnding>
+		</file>
+	</files>
+
 </assembly>
 
