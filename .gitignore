@@ -1,6 +1,7 @@
 *.class
 .classpath
 .project
+twitter4j.properties
 target/
 
 # Package Files #
