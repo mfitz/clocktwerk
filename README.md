@@ -38,7 +38,7 @@ that identifies your app. You will need these values
 in order to allow Clocktwerk to authenticate to 
 Twitter.
 
-The OAuth credentials Clocktwerk uses are pulled from 
+The OAuth credentials Clocktwerk uses are read from 
 a twitter4.properties file on the Java classpath. 
 Clocktwerk includes a tool to generate this file for you. 
 Once you have built a distro and unpacked it to your 
