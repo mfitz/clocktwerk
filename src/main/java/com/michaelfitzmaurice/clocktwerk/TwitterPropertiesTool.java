@@ -130,7 +130,8 @@ public class TwitterPropertiesTool {
                 } catch (IOException ignore) {
                 } catch (URISyntaxException e) {
                     throw new AssertionError(e);
-                }
+                } catch (UnsupportedOperationException ignore) {}
+                
                 System.out.print("Enter the authorization PIN and hit enter:");
                 String pin = br.readLine();
                 try {

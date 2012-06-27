@@ -70,3 +70,17 @@ tweeting infinitely at the specified interval until the
 process is killed. However, Clocktwerk does not persist
 any state between restarts, so when you restart, tweeting
 will begin from the first line in tweets.txt
+
+Tweeting interval
+===========================
+
+By default, Clocktwerk tweets every 6 hours, sending
+the first tweet when the application starts up. You can
+override this default using a Java system property to
+specify the interval between tweets in milliseconds. For
+example, to tweet once every 24 hours, you would edit 
+tweet-daemon.sh thus (86400000 being 24 hours expressed
+as milliseconds)
+
+    nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmau
+rice.clocktwerk.TweetDaemon & 
