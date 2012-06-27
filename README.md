@@ -82,5 +82,4 @@ example, to tweet once every 24 hours, you would edit
 tweet-daemon.sh thus (86400000 being 24 hours expressed
 as milliseconds)
 
-    nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmau
-rice.clocktwerk.TweetDaemon & 
+    nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmaurice.clocktwerk.TweetDaemon & 
