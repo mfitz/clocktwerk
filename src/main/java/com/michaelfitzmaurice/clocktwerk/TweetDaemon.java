@@ -21,13 +21,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.prevayler.Prevayler;
+import org.prevayler.PrevaylerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.michaelfitzmaurice.clocktwerk.prevayler.PrevaylentTweetIndex;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -40,7 +45,6 @@ import twitter4j.TwitterFactory;
 public class TweetDaemon {
 	
     private static final int MAX_TWEET_LENGTH = 140;
-    private static final int INITIAL_TWEET_INDEX = 0;
     
 	// default to 6 hours between tweets
 	private static final long DEFAULT_TWEET_INTERVAL_MILLISECONDS = 
@@ -52,14 +56,23 @@ public class TweetDaemon {
 		LoggerFactory.getLogger(TweetDaemon.class);
 	
 	private List<String> tweets;
-	private int tweetIndex = INITIAL_TWEET_INDEX;
 	private Twitter twitter;
 	private int tweetsPosted;
+	private TweetIndex tweetIndex;
 	
 	public TweetDaemon() throws IOException {
 		
-		tweets = getTweetList();
+	    tweets = getTweetList();
 		twitter = authenticateToTwitter();
+		tweetIndex = getTweetIndex();
+		
+		int previousNumberOfTweets = tweetIndex.getNumberOfTweets();
+		if ( previousNumberOfTweets != tweets.size() ) {
+		    LOG.warn("No. lines in tweets.txt changed; previously {}, now {}", 
+		              previousNumberOfTweets, 
+		              tweets.size() );
+		    tweetIndex.setNumberOfTweets( tweets.size() );
+		}
 	}
 	
 	private List<String> getTweetList() throws IOException {
@@ -120,6 +133,20 @@ public class TweetDaemon {
         
         return twitter;
 	}
+	
+	private TweetIndex getTweetIndex() throws IOException {
+	    
+	    Prevayler prevayler = null;
+        try {
+            prevayler = 
+                    PrevaylerFactory.createPrevayler( 
+                            new HashMap<String, Integer>() );
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Error reading from Prevayler", e);
+        }
+        
+        return new PrevaylentTweetIndex(prevayler);
+	}
 
 	public void start() {
 		
@@ -140,21 +167,17 @@ public class TweetDaemon {
 
 			@Override
 			public void run() {
-				if ( tweetIndex == tweets.size() ) {
-					LOG.info("Reached the end of the tweet file; starting " 
-								+ "from the beginning again");
-					tweetIndex = INITIAL_TWEET_INDEX;
-				}
 				
-				String tweet = tweets.get(tweetIndex);
+				LOG.info("Fetching next tweet...");
+			    String tweet = 
+				        tweets.get( tweetIndex.incrementAndGetIndex() );
 				try {
 					LOG.info("Sending tweet number {} as user {}: '{}'", 
 							new Object[] {
-					            tweetIndex,
+					            tweetIndex.getIndex(),
     							twitter.getOAuthAccessToken().getUserId(),
     							tweet});
 					twitter.updateStatus(tweet);
-					tweetIndex++;
 					tweetsPosted++;
 					LOG.info("Posted {} tweets since startup", tweetsPosted);
 				} catch (TwitterException e) {
