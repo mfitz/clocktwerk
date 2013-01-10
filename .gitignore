@@ -1,8 +1,10 @@
 *.class
 .classpath
 .project
+.settings/
 twitter4j.properties
 target/
+PrevalenceBase/
 
 # Package Files #
 *.jar
