@@ -67,9 +67,12 @@ validation is performed against the content of each
 tweet. When the last tweet from the file has been posted, 
 Clocktwerk starts again from the first line, thus 
 tweeting infinitely at the specified interval until the 
-process is killed. However, Clocktwerk does not persist
-any state between restarts, so when you restart, tweeting
-will begin from the first line in tweets.txt
+process is killed.
+
+Clocktwerk persists the index into tweets.txt, so when you 
+restart the application, tweeting will pickup from the 
+location previously reached, rather than starting again 
+from the beginning of the file.
 
 Tweeting interval
 ===========================
