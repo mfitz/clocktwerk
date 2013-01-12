@@ -69,8 +69,8 @@ Clocktwerk starts again from the first line, thus
 tweeting infinitely at the specified interval until the 
 process is killed.
 
-Clocktwerk persists the index into tweets.txt, so when you 
-restart the application, tweeting will pickup from the 
+Clocktwerk persists the index into tweets.txt. Hence, when 
+you restart the application, tweeting continues from the 
 location previously reached, rather than starting again 
 from the beginning of the file.
 
