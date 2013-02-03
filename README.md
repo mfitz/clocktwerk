@@ -1,8 +1,9 @@
 Clocktwerk
 ===========
 
-Posts tweets read from a file to a configured account at 
-a constant interval. Clocktwerk uses OAuth authentication 
+Clocktwerk is a Twitterbot that automates the posting
+of Twitter updates at regular intervals. Clocktwerk 
+uses OAuth authentication 
 (see https://dev.twitter.com/docs/auth/oauth/faq), 
 hence does not need access to the Twitter login 
 credentials of the account being updated. 
