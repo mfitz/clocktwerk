@@ -32,8 +32,8 @@ import twitter4j.User;
 
 /**
  * Records number of followers for a supplied list of twitter users.
- * The number of followers is appended to a CSV file named 
- * <screenName>-followers.csv in a specified parent directory.
+ * The number of followers for each user is appended to a CSV file 
+ * named <screenName>-followers.csv in a specified parent directory.
  * 
  * @author Michael Fitzmaurice
  */
