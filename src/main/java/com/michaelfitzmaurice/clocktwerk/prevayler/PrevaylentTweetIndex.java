@@ -34,7 +34,6 @@ public class PrevaylentTweetIndex implements TweetIndex {
     public int incrementAndGetIndex() {
         
         try {
-            
             return (Integer)prevayler.execute( 
                     new IncrementAndGetTweetIndexTransaction() );
         } catch (Exception e) {
@@ -56,12 +55,8 @@ public class PrevaylentTweetIndex implements TweetIndex {
     @Override
     public void setIndex(int index) {
         
-        try {
-            prevayler.execute( new SetTweetIndexTransaction(
+        prevayler.execute( new SetTweetIndexTransaction(
                                     new Integer(index) ) );
-        } catch (Exception e) {
-            throw new RuntimeException("Error setting tweet index", e);            
-        }
     }
 
     @Override
@@ -85,12 +80,8 @@ public class PrevaylentTweetIndex implements TweetIndex {
     @Override
     public void setNumberOfTweets(int numberOfTweets) {
         
-        try {
-            prevayler.execute( new SetNumberOfTweetsTransaction(
+        prevayler.execute( new SetNumberOfTweetsTransaction(
                                     new Integer(numberOfTweets) ) );
-        } catch (Exception e) {
-            throw new RuntimeException("Error setting no. tweets", e);            
-        }
     }
 
 }

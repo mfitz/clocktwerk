@@ -30,6 +30,10 @@ public class SetNumberOfTweetsTransaction implements Transaction {
         super();
         this.numberOfTweets = numberOfTweets;
     }
+    
+    Integer getNumberOfTweets() {
+        return numberOfTweets;
+    }
 
     @Override
     public void executeOn(Object prevaylentSystem, Date ignored) {

@@ -15,6 +15,9 @@
  */
 package com.michaelfitzmaurice.clocktwerk.prevayler;
 
+import static com.michaelfitzmaurice.clocktwerk.prevayler.PrevaylentTweetIndex.INDEX_KEY;
+import static com.michaelfitzmaurice.clocktwerk.prevayler.PrevaylentTweetIndex.NUMBER_OF_TWEETS_KEY;
+
 import java.util.Date;
 import java.util.HashMap;
 
@@ -41,7 +44,7 @@ implements TransactionWithQuery {
             (HashMap<String, Integer>)prevaylentSystem;
         
         int currentIndex = -1;
-        Integer persistedIndex = map.get(PrevaylentTweetIndex.INDEX_KEY);
+        Integer persistedIndex = map.get(INDEX_KEY);
         if (persistedIndex != null) {
             LOG.debug("Found index {} in Prevayler", persistedIndex);
             currentIndex = persistedIndex.intValue();
@@ -51,8 +54,7 @@ implements TransactionWithQuery {
         currentIndex++;
         LOG.debug("Index incremented to {}", currentIndex);
         
-        Integer persistedNumberOfTweets = 
-                map.get(PrevaylentTweetIndex.NUMBER_OF_TWEETS_KEY);
+        Integer persistedNumberOfTweets = map.get(NUMBER_OF_TWEETS_KEY);
         if (persistedNumberOfTweets != null) {
             LOG.debug("Checking if index needs to wrap around...");
             if ( currentIndex >= persistedNumberOfTweets.intValue() ) {

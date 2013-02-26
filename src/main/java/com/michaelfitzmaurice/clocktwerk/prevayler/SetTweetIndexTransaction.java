@@ -30,6 +30,10 @@ public class SetTweetIndexTransaction implements Transaction {
         super();
         this.tweetIndex = tweetIndex;
     }
+    
+    Integer getTweetIndex() {
+        return tweetIndex;
+    }
 
     @Override
     public void executeOn(Object prevaylentSystem, Date ignored) {
