@@ -16,4 +16,4 @@
 #    limitations under the License.
 ##########################################################
 
-nohup java -classpath lib:lib/* com.michaelfitzmaurice.clocktwerk.TweetDaemon &
+nohup java -classpath lib:lib/* com.michaelfitzmaurice.clocktwerk.apps.TweetDaemon &

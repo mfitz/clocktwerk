@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.michaelfitzmaurice.clocktwerk;
+package com.michaelfitzmaurice.clocktwerk.apps;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;

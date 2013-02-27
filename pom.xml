@@ -85,6 +85,12 @@
 	       <version>3.0</version>
 	       <scope>test</scope>
         </dependency>
+        
+        <dependency>
+           <groupId>commons-io</groupId>
+	       <artifactId>commons-io</artifactId>
+	       <version>2.4</version>
+        </dependency>
 
 	</dependencies>
 
@@ -149,6 +155,29 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<!-- 
+			     For some reason, including this in the reporting tag causes
+			     the ignores section to become irrelevant, meaning the coverage
+			     report from running "mvn site" contains all the extraneous
+			     stuff I don't want instrumented 
+			-->
+			<plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <instrumentation>
+                       <ignores>
+                           <ignore>org.slf4j.*</ignore>
+                        </ignores>
+                        <excludes>
+                          <exclude>src/test/**/*</exclude>
+                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/**/*.class</exclude>
+                        </excludes>
+                    </instrumentation>
+                </configuration>
+            </plugin>
 
 		</plugins>
 
@@ -173,39 +202,6 @@
 					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
 				</configuration>
 				<version>2.6</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.5.2</version>
-				<configuration>
-					<instrumentation>
-					   <ignores>
-	                       <ignore>org.slf4j.*</ignore>
-	                       <ignore>com.michaelfitzmaurice.clocktwerk.FollowerCounter</ignore>
-	                       <ignore>com.michaelfitzmaurice.clocktwerk.FollowerChecker</ignore>
-	                       <ignore>com.michaelfitzmaurice.clocktwerk.TwitterPropertiesTool</ignore>
-	                       <!-- <ignore>src/test/**/</ignore> -->
-                        </ignores>
-						<includes>
-							<include>src/main/java/com/michaelfitzmaurice/**/</include>
-						</includes>
-						<excludes>
-						  <exclude>src/test/**/</exclude>
-						  <exclude>src/main/java/com/michaelfitzmaurice/FollowerCounter.class</exclude>
-						  <exclude>src/main/java/com/michaelfitzmaurice/FollowerChecker.class</exclude>
-						  <exclude>src/main/java/com/michaelfitzmaurice/TwitterPropertiesTool.class</exclude>
-						</excludes>
-					</instrumentation>
-				</configuration>
-				<!--  <executions>
-                    <execution>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions> -->
 			</plugin>
 
 			<plugin>

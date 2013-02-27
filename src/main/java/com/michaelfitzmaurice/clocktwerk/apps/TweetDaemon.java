@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.michaelfitzmaurice.clocktwerk;
+package com.michaelfitzmaurice.clocktwerk.apps;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,6 +32,7 @@ import org.prevayler.PrevaylerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.michaelfitzmaurice.clocktwerk.TweetIndex;
 import com.michaelfitzmaurice.clocktwerk.prevayler.PrevaylentTweetIndex;
 
 import twitter4j.Twitter;

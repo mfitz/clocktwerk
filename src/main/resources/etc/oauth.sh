@@ -19,7 +19,7 @@
 echo "Launching Twitter4J properties tool..."
 echo ""
  
-java -classpath lib:lib/* com.michaelfitzmaurice.clocktwerk.TwitterPropertiesTool $1 $2
+java -classpath lib:lib/* com.michaelfitzmaurice.clocktwerk.apps.TwitterPropertiesTool $1 $2
 
 RETURN_CODE=$?
 echo ""
