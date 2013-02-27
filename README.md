@@ -1,7 +1,7 @@
 Clocktwerk
 ===========
 
-Clocktwerk is a Twitterbot that automates the posting
+A Twitterbot that automates the posting
 of Twitter updates at regular intervals. Clocktwerk 
 uses OAuth authentication 
 (see https://dev.twitter.com/docs/auth/oauth/faq), 
@@ -12,16 +12,19 @@ Building
 ===========
 
 Clocktwerk uses Apache Maven (http://maven.apache.org/).
-To compile Clocktwerk and build a distro in zip format,
-use:
+To compile and build a distro in zip format, use:
 
     mvn clean assembly:assembly 
+
+To generate a test coverage report:
+
+    mvn clean cobertura:clean cobertura:cobertura
 
 Authentication to Twitter
 ===========================
 
 Clocktwerk uses the Twitter API to send updates. To
-authorise Clocktwerk to do this for the account you
+authorise this for the account you
 want to automate, you will need to create a Twitter
 application on the Twitter developer site. Login to
 Twitter as the user that Clocktwerk will be tweeting
@@ -39,7 +42,7 @@ that identifies your app. You will need these values
 in order to allow Clocktwerk to authenticate to 
 Twitter.
 
-The OAuth credentials Clocktwerk uses are read from 
+The relavant OAuth credentials are read from 
 a twitter4.properties file on the Java classpath. 
 Clocktwerk includes a tool to generate this file for you. 
 Once you have built a distro and unpacked it to your 
@@ -53,14 +56,20 @@ The script will build a twitter4j.properties file that
 includes the authentication details granted by your 
 Twitter user to your new application. The oauth script
 moves this file into the lib directory, thus placing it
-on Clocktwerk's Java classpath.
+on the Java classpath. You could put the file anywhere
+else you prefer, as long as you add the directory
+to the classpath when you launch the Clocktwerk
+application.
 
 Feeding Clocktwerk your tweets
 ===========================
 
-Tweets are pulled from a tweets.txt file on the classpath.
-Once you have prepared your tweets file, drop it into the
-lib directory.
+Tweets are pulled from a tweets.txt file on the JVM classpath.
+Once you have prepared your tweets file, dropping it into the
+lib directory is an easy way to place it on the classpath.
+However, as with the twitter4.properties file, you can put
+his file anywhere you like so long as you modify the JVM
+classpath accordingly.
 
 Each line in the file constitutes a single tweet; tweets 
 longer than 140 characters are ignored. No further 

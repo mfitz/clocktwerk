@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 
 public class TweetDatabase {
     
+    static final int MAX_TWEET_LENGTH = 140;
+    
     private static final transient Logger LOG = 
             LoggerFactory.getLogger(TweetDatabase.class);
-    
-    private static final int MAX_TWEET_LENGTH = 140;
     
     private ArrayList<String> tweetList = new ArrayList<String>();
     private TweetIndex tweetIndex;
@@ -58,18 +58,22 @@ public class TweetDatabase {
         reader.close();
         
         this.tweetIndex = tweetIndex;
-//        
-//        int previousNumberOfTweets = tweetIndex.getNumberOfTweets();
-//        if ( previousNumberOfTweets != tweets.size() ) {
-//            LOG.warn("No. lines in tweets.txt changed; previously {}, now {}", 
-//                      previousNumberOfTweets, 
-//                      tweets.size() );
-//            tweetIndex.setNumberOfTweets( tweets.size() );
-//        }
+        
+        int previousNumberOfTweets = tweetIndex.getNumberOfTweets();
+        if ( previousNumberOfTweets != tweetList.size() ) {
+            LOG.warn("No. lines in tweets.txt changed; previously {}, now {}", 
+                      previousNumberOfTweets, 
+                      tweetList.size() );
+            tweetIndex.setNumberOfTweets( tweetList.size() );
+        }
     }
     
     public String getNextTweet() {
         return tweetList.get( tweetIndex.incrementAndGetIndex() );
+    }
+    
+    String[] getAllTweets() {
+        return tweetList.toArray( new String[ tweetList.size() ] );
     }
 
 }

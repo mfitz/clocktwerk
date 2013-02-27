@@ -15,96 +15,136 @@
  */
 package com.michaelfitzmaurice.clocktwerk;
 
-import static org.junit.Assert.*;
+import static com.michaelfitzmaurice.clocktwerk.TweetDatabase.MAX_TWEET_LENGTH;
+import static org.easymock.EasyMock.createStrictMock;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.prevayler.Prevayler;
-import org.prevayler.PrevaylerFactory;
-
-import com.michaelfitzmaurice.clocktwerk.TweetDatabase;
-import com.michaelfitzmaurice.clocktwerk.prevayler.PrevaylentTweetIndex;
 
 public class TweetDatabaseTest {
     
     private File tweetFile;
-    private PrevaylentTweetIndex tweetIndex;
-    private String[] tweets = {"one", "two", "three"};
+    private TweetIndex tweetIndex;
+    private String[] tweets = {"tweet one", "tweet two", "tweet three"};
     
     @Before
     public void setup() throws Exception {
-        File tempDir = new File( System.getProperty("java.io.tmpdir") );
+        tweetFile = createTweetsFile("tweet-file.txt", tweets);
         
-        tweetFile = new File(tempDir, "tweet-file.txt");
-        createTweetsFile(tweetFile, tweets);
-        tweetFile.deleteOnExit();
-        
-        File prevaylerDir = 
-            new File(tempDir, "prevayler-" + System.currentTimeMillis() );
-        assertTrue( prevaylerDir.mkdir() );
-        prevaylerDir.deleteOnExit();
-        Prevayler prevayler = null;
-            prevayler = 
-                    PrevaylerFactory.createPrevayler( 
-                            new HashMap<String, Integer>(), 
-                            prevaylerDir.getAbsolutePath() );
-        tweetIndex = new PrevaylentTweetIndex(prevayler);
-        tweetIndex.setNumberOfTweets(tweets.length);
-    } 
-    
+        tweetIndex = createStrictMock(TweetIndex.class);
+        tweetIndex.getNumberOfTweets();
+        expectLastCall().andReturn(tweets.length);
+        replay(tweetIndex);
+    }
+
     @Test (expected = IOException.class)
     public void rejectsNonExistentTweetFile() 
     throws IOException {
         
         File nonExistant = new File("/tmp/does/not/exist");
-        assertFalse( nonExistant.exists() );
+        assertFalse(nonExistant + " should not exist, but does", 
+                    nonExistant.exists() );
         
         new TweetDatabase(nonExistant, tweetIndex);
     }
     
     @Test
-    public void readsNextTweetFromNextLineOfTweetFile() 
-    throws Exception {
+    public void ignoresTweetsLongerThanMaximumTweetLength() 
+    throws IOException{
+        
+        StringBuffer tooLongTweet = new StringBuffer();
+        for (int i = 0; i <= MAX_TWEET_LENGTH; i++) {
+            tooLongTweet.append('X');
+        }
+        
+        String legalTweet = "blah";
+        String[] corruptedTweets = 
+                new String[] {tooLongTweet.toString(), legalTweet};
+        File corruptedFile = 
+                createTweetsFile("corrupted-tweets", corruptedTweets);
+        
+        tweetIndex = createStrictMock(TweetIndex.class);
+        tweetIndex.getNumberOfTweets();
+        expectLastCall().andReturn(corruptedTweets.length - 1);
+        replay(tweetIndex);
         
         TweetDatabase tweetDatabase = 
-            new TweetDatabase(tweetFile, tweetIndex);
+                new TweetDatabase(corruptedFile, tweetIndex);
+        
+        String[] tweetsAddedToDb = tweetDatabase.getAllTweets();
+        assertEquals(1, tweetsAddedToDb.length);
+        assertEquals(legalTweet, tweetsAddedToDb[0]);
+    }
+    
+    @Test
+    public void usesTweetIndexToFindNextTweet() 
+    throws IOException {
+        
+        int index = 0;
+        TweetDatabase tweetDatabase;
+        
         for (int i = 0; i < tweets.length; i++) {
-            assertEquals( tweets[i], tweetDatabase.getNextTweet() );            
+            tweetIndex = createStrictMock(TweetIndex.class);
+            tweetIndex.getNumberOfTweets();
+            expectLastCall().andReturn(tweets.length);
+            tweetIndex.incrementAndGetIndex();
+            expectLastCall().andReturn(index);
+            replay(tweetIndex);
+            
+            tweetDatabase = new TweetDatabase(tweetFile, tweetIndex);
+            assertEquals( tweets[index], tweetDatabase.getNextTweet() );            
+            verify(tweetIndex); 
+            
+            index++;
         }
     }
     
     @Test
-    public void wrapsAroundToBeginningOfFileAfterReachingTheEnd()
-    throws Exception {
+    public void resetsNumberOfTweetsOnIndexWhenTweetCountDiffersInTweetFile() 
+    throws IOException {
         
-        TweetDatabase tweetDatabase = 
-            new TweetDatabase(tweetFile, tweetIndex);
-        for (int i = 0; i < tweets.length; i++) {
-            tweetDatabase.getNextTweet();            
-        }
+        int oldNumberOfTweets = tweets.length - 1;
+        tweetIndex = createStrictMock(TweetIndex.class);
+        tweetIndex.getNumberOfTweets();
+        expectLastCall().andReturn(oldNumberOfTweets);
+        tweetIndex.setNumberOfTweets(tweets.length);
+        replay(tweetIndex);
         
-        assertEquals( tweets[0], tweetDatabase.getNextTweet() );
+        new TweetDatabase(tweetFile, tweetIndex);
+        verify(tweetIndex); 
     }
     
     ///////////////////////////////////////////////////////
     // helper methods
     ///////////////////////////////////////////////////////
-    private void createTweetsFile(File tweetFile, String[] tweets)
+    private File createTweetsFile(String tweetFileName, String[] tweets)
     throws IOException {
         
-        FileWriter writer = new FileWriter(tweetFile);
+        File tempDir = new File( System.getProperty("java.io.tmpdir") );
+        File tweetsFile = new File(tempDir, tweetFileName);
+        tweetsFile.deleteOnExit();
         
+        FileWriter writer = new FileWriter(tweetsFile);
         for (int i = 0; i < tweets.length; i++) {
             writer.write(tweets[i]);
             writer.write( System.getProperty("line.separator") );
         }
-        
         writer.close();
+        
+        assertTrue( "Failed to create tweets file " + tweetsFile 
+                        + " for test fixture", 
+                    tweetsFile.exists() );
+        
+        return tweetsFile;
     }
-
 }
