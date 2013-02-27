@@ -193,24 +193,6 @@ public class PrevaylentTweetIndexTest {
         verify(mockPrevayler);
     }
     
-//    @Test
-//    public void delegatesSettingIndexValueToPrevayler()
-//    throws Exception {
-//        
-//        Integer indexValue = randomPositiveInteger();
-//        SetTweetIndexTransaction transaction = 
-//            new SetTweetIndexTransaction( indexValue.intValue() );
-//        
-//        Prevayler mockPrevayler = createStrictMock(Prevayler.class);
-//        mockPrevayler.execute( eqSetIndexTransaction(transaction) );
-//        replay(mockPrevayler);
-//
-//        PrevaylentTweetIndex index = new PrevaylentTweetIndex(mockPrevayler);
-//        index.setIndex( indexValue.intValue() );
-//        
-//        verify(mockPrevayler);
-//    }
-    
     @Test
     public void delegatesSettingNumberOfTweetsValueToPrevayler()
     throws Exception {

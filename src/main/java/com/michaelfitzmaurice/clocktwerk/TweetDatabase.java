@@ -58,6 +58,10 @@ public class TweetDatabase {
         reader.close();
         
         this.tweetIndex = tweetIndex;
+        updateNumberOfTweets();
+    }
+
+    private void updateNumberOfTweets() {
         
         int previousNumberOfTweets = tweetIndex.getNumberOfTweets();
         if ( previousNumberOfTweets != tweetList.size() ) {

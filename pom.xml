@@ -178,9 +178,7 @@
                         </includes>
                         <excludes>
                           <exclude>src/test/**/*</exclude>
-                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/FollowChecker.class</exclude>
-                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/FollowerCounter.class</exclude>
-                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/TwitterPropertiesTool.class</exclude>
+                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/**/*</exclude>
                         </excludes>
                     </instrumentation>
                 </configuration>

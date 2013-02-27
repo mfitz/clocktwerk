@@ -51,27 +51,22 @@ public class TweetDatabaseTest {
     public void rejectsNonExistentTweetFile() 
     throws IOException {
         
-        File nonExistant = new File("/tmp/does/not/exist");
-        assertFalse(nonExistant + " should not exist, but does", 
-                    nonExistant.exists() );
+        File nonExistent = new File("/tmp/does/not/exist");
+        assertFalse(nonExistent + " should not exist, but does", 
+                    nonExistent.exists() );
         
-        new TweetDatabase(nonExistant, tweetIndex);
+        new TweetDatabase(nonExistent, tweetIndex);
     }
     
     @Test
     public void ignoresTweetsLongerThanMaximumTweetLength() 
     throws IOException{
         
-        StringBuffer tooLongTweet = new StringBuffer();
-        for (int i = 0; i <= MAX_TWEET_LENGTH; i++) {
-            tooLongTweet.append('X');
-        }
-        
         String legalTweet = "blah";
         String[] corruptedTweets = 
-                new String[] {tooLongTweet.toString(), legalTweet};
+                new String[] {tooLongTweet(), legalTweet};
         File corruptedFile = 
-                createTweetsFile("corrupted-tweets", corruptedTweets);
+                createTweetsFile("corrupted-tweets.txt", corruptedTweets);
         
         tweetIndex = createStrictMock(TweetIndex.class);
         tweetIndex.getNumberOfTweets();
@@ -84,6 +79,7 @@ public class TweetDatabaseTest {
         String[] tweetsAddedToDb = tweetDatabase.getAllTweets();
         assertEquals(1, tweetsAddedToDb.length);
         assertEquals(legalTweet, tweetsAddedToDb[0]);
+        verify(tweetIndex);
     }
     
     @Test
@@ -146,5 +142,15 @@ public class TweetDatabaseTest {
                     tweetsFile.exists() );
         
         return tweetsFile;
+    }
+    
+    private String tooLongTweet() {
+        
+        StringBuffer tooLongTweet = new StringBuffer();
+        for (int i = 0; i <= MAX_TWEET_LENGTH; i++) {
+            tooLongTweet.append('X');
+        }
+        
+        return tooLongTweet.toString();
     }
 }
