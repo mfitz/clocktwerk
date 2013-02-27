@@ -25,8 +25,6 @@ public interface TweetIndex {
 
     public int incrementAndGetIndex();
     public int getIndex();
-    public void setIndex(int index);
-    
     public int getNumberOfTweets();
     public void setNumberOfTweets(int numberOfTweets);
 }

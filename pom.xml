@@ -173,9 +173,14 @@
                        <ignores>
                            <ignore>org.slf4j.*</ignore>
                         </ignores>
+                        <includes>
+                            <include>com/michaelfitzmaurice/**/*</include>
+                        </includes>
                         <excludes>
                           <exclude>src/test/**/*</exclude>
-                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/**/*.class</exclude>
+                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/FollowChecker.class</exclude>
+                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/FollowerCounter.class</exclude>
+                          <exclude>com/michaelfitzmaurice/clocktwerk/apps/TwitterPropertiesTool.class</exclude>
                         </excludes>
                     </instrumentation>
                 </configuration>

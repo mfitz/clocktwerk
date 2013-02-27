@@ -193,23 +193,23 @@ public class PrevaylentTweetIndexTest {
         verify(mockPrevayler);
     }
     
-    @Test
-    public void delegatesSettingIndexValueToPrevayler()
-    throws Exception {
-        
-        Integer indexValue = randomPositiveInteger();
-        SetTweetIndexTransaction transaction = 
-            new SetTweetIndexTransaction( indexValue.intValue() );
-        
-        Prevayler mockPrevayler = createStrictMock(Prevayler.class);
-        mockPrevayler.execute( eqSetIndexTransaction(transaction) );
-        replay(mockPrevayler);
-
-        PrevaylentTweetIndex index = new PrevaylentTweetIndex(mockPrevayler);
-        index.setIndex( indexValue.intValue() );
-        
-        verify(mockPrevayler);
-    }
+//    @Test
+//    public void delegatesSettingIndexValueToPrevayler()
+//    throws Exception {
+//        
+//        Integer indexValue = randomPositiveInteger();
+//        SetTweetIndexTransaction transaction = 
+//            new SetTweetIndexTransaction( indexValue.intValue() );
+//        
+//        Prevayler mockPrevayler = createStrictMock(Prevayler.class);
+//        mockPrevayler.execute( eqSetIndexTransaction(transaction) );
+//        replay(mockPrevayler);
+//
+//        PrevaylentTweetIndex index = new PrevaylentTweetIndex(mockPrevayler);
+//        index.setIndex( indexValue.intValue() );
+//        
+//        verify(mockPrevayler);
+//    }
     
     @Test
     public void delegatesSettingNumberOfTweetsValueToPrevayler()
@@ -237,38 +237,7 @@ public class PrevaylentTweetIndexTest {
         return  new Integer( new Random().nextInt(100000) );
     }
     
-    // custom Matchers for command objects passed to Prevayler
-    public static SetTweetIndexTransaction eqSetIndexTransaction(
-                                SetTweetIndexTransaction expected) {
-        
-        reportMatcher( new SetTweetIndexTransactionEquals(expected) );
-        return expected;
-    }
-    
-    static class SetTweetIndexTransactionEquals implements IArgumentMatcher {
-        
-        private SetTweetIndexTransaction expected;
-        SetTweetIndexTransactionEquals(SetTweetIndexTransaction expected){
-            this.expected = expected;
-        }
-        
-        @Override
-        public void appendTo(StringBuffer arg0) {
-            arg0.append("eqSetTweetIndexTransaction(");
-            arg0.append( expected.getTweetIndex() );
-            arg0.append(")");
-        }
-
-        @Override
-        public boolean matches(Object arg0) {
-            if ( (arg0 instanceof SetTweetIndexTransaction) == false){
-                return false;
-            }
-            
-            return ( (SetTweetIndexTransaction)arg0).getTweetIndex().equals(
-                        expected.getTweetIndex() );
-        }
-    }
+    // custom Matcher for command object passed to Prevayler
     
     public static SetNumberOfTweetsTransaction eqSetNumberOfTweetsTransaction(
             SetNumberOfTweetsTransaction expected) {

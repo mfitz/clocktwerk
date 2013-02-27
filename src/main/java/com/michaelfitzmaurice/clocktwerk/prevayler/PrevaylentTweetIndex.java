@@ -53,13 +53,6 @@ public class PrevaylentTweetIndex implements TweetIndex {
     }
 
     @Override
-    public void setIndex(int index) {
-        
-        prevayler.execute( new SetTweetIndexTransaction(
-                                    new Integer(index) ) );
-    }
-
-    @Override
     public int getNumberOfTweets() {
         
         try {
