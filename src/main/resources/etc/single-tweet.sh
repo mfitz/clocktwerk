@@ -16,4 +16,7 @@
 #    limitations under the License.
 ##########################################################
 
+BASEDIR=$(dirname $0)
+cd $BASEDIR
+
 java -classpath lib:lib/* -Dcom.michaelfitzmaurice.clocktwerk.single-tweet-mode=true com.michaelfitzmaurice.clocktwerk.apps.Clocktwerk
