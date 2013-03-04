@@ -16,4 +16,4 @@
 #    limitations under the License.
 ##########################################################
 
-nohup java -classpath lib:lib/* com.michaelfitzmaurice.clocktwerk.apps.Clocktwerk &
+java -classpath lib:lib/* -Dcom.michaelfitzmaurice.clocktwerk.single-tweet-mode=true com.michaelfitzmaurice.clocktwerk.apps.Clocktwerk

@@ -31,10 +31,10 @@ import twitter4j.TwitterException;
 public class TweetDaemon {
 	
     // default to 6 hours between tweets
-	static final long DEFAULT_TWEET_INTERVAL_MILLISECONDS = 
-		1000 * 60 * 60 * 6; 
-	static final String TWEET_INTERVAL_PROPERTY = 
-		"tweetdaemon.tweetinterval.milliseconds";
+    static final long DEFAULT_TWEET_INTERVAL_MILLISECONDS = 
+            1000 * 60 * 60 * 6; 
+    static final String TWEET_INTERVAL_PROPERTY = 
+            "tweetdaemon.tweetinterval.milliseconds";
 	
 	private static final transient Logger LOG = 
 		LoggerFactory.getLogger(TweetDaemon.class);
@@ -63,8 +63,8 @@ public class TweetDaemon {
 		LOG.info("Daemon started; tweeting every {} ms", getTweetInterval() );
 	}
 	
-	public int tweetsPostedSinceStartup() {
-        return tweetsPosted;
+    public int tweetsPostedSinceStartup() {
+	    return tweetsPosted;
     }
 	
 	private Runnable getTweetRunnable() {
@@ -73,24 +73,12 @@ public class TweetDaemon {
 
 			@Override
 			public void run() {
-				
-				LOG.info("Fetching next tweet...");
-			    String tweet = tweetDatabase.getNextTweet();
-			    
-				try {
-				    String screenName = twitterClient.getScreenName();
-					LOG.info("Sending tweet number {} as user {}: '{}'", 
-							new Object[] {
-					            tweetsPosted,
-    							screenName,
-    							tweet});
-					twitterClient.updateStatus(tweet);
-					tweetsPosted++;
-					LOG.info("Posted {} tweets since startup", tweetsPosted);
-				} catch (TwitterException e) {
-					// swallow
-					LOG.warn("Failed to send tweet", e);
-				}
+			    try {
+			        sendNextTweet();
+			    } catch (TweetException e) {
+			        // swallow
+			        LOG.error("Failed to send scheduled tweet", e);
+			    }
 			}
 		};
 	}
@@ -99,5 +87,29 @@ public class TweetDaemon {
 		 return Long.getLong(TWEET_INTERVAL_PROPERTY, 
 				 			DEFAULT_TWEET_INTERVAL_MILLISECONDS);
 	}
+
+    public void sendNextTweet() 
+    throws TweetException {
+        
+        LOG.info("Fetching next tweet...");
+        String tweet = tweetDatabase.getNextTweet();
+        
+        try {
+            String screenName = twitterClient.getScreenName();
+            LOG.info("Sending tweet number {} as user {}: '{}'", 
+                    new Object[] {
+                        tweetsPosted,
+                        screenName,
+                        tweet});
+            twitterClient.updateStatus(tweet);
+            tweetsPosted++;
+            LOG.info("Posted {} tweets since startup", tweetsPosted);
+        } catch (TwitterException e) {
+            String msg = 
+                String.format("Error sending tweet '%s'", tweet);
+            LOG.error(msg, e);
+            throw new TweetException(msg, e);
+        }
+    }
 		
 }

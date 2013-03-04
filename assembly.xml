@@ -22,8 +22,7 @@
 			<outputDirectory></outputDirectory>
 			<fileMode>0755</fileMode>
 			<includes>
-				<include>tweet-daemon.sh</include>
-				<include>oauth.sh</include>
+				<include>*.sh</include>
 			</includes>
 		</fileSet>
 
