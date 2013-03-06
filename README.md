@@ -93,7 +93,7 @@ Clocktwerk's internal scheduling is fairly crude and
 limited.
 
 Internal Scheduling
-——————————————————————
+-------------------------
 
 You can run Clocktwerk as a deamon process, whereby it will
 run in the background, doing nothing until it is time to
@@ -108,7 +108,7 @@ as milliseconds)
     nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmaurice.clocktwerk.TweetDaemon & 
 
 External Scheduling
-——————————————————————
+-------------------------
 
 External tools such as cron (http://en.wikipedia.org/wiki/Cron)
 offer much more scheduling flexibility than Clocktwerk's
