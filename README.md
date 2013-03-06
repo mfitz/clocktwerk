@@ -18,7 +18,7 @@ To compile and build a distro in zip format, use:
 
 To generate a test coverage report:
 
-    mvn clean cobertura:clean cobertura:cobertura
+    mvn clean cobertura:cobertura
 
 Authentication to Twitter
 ===========================
@@ -75,24 +75,54 @@ Each line in the file constitutes a single tweet; tweets
 longer than 140 characters are ignored. No further 
 validation is performed against the content of each 
 tweet. When the last tweet from the file has been posted, 
-Clocktwerk starts again from the first line, thus 
-tweeting infinitely at the specified interval until the 
-process is killed.
+Clocktwerk starts again from the first line, thus it
+will never run out of tweets.
 
 Clocktwerk persists the index into tweets.txt. Hence, when 
-you restart the application, tweeting continues from the 
+you start the application, tweeting continues from the 
 location previously reached, rather than starting again 
 from the beginning of the file.
 
-Tweeting interval
+Tweet Scheduling
 ===========================
 
-By default, Clocktwerk tweets every 6 hours, sending
-the first tweet when the application starts up. You can
-override this default using a Java system property to
-specify the interval between tweets in milliseconds. For
-example, to tweet once every 24 hours, you would edit 
+There are two ways to schedule your tweets: internally 
+to Clocktwerk, or externally using some additional tool.
+External scheduling usually offers a lot more flexibility;
+Clocktwerk's internal scheduling is fairly crude and 
+limited.
+
+Internal Scheduling
+——————————————————————
+
+You can run Clocktwerk as a deamon process, whereby it will
+run in the background, doing nothing until it is time to
+send the next scheduled tweet. By default, Clocktwerk tweets 
+every 6 hours, sending the first tweet when the application 
+starts up. You can override this default using a Java system 
+property to specify the interval between tweets in milliseconds. 
+For example, to tweet once every 24 hours, you would edit 
 tweet-daemon.sh thus (86400000 being 24 hours expressed
 as milliseconds)
 
     nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmaurice.clocktwerk.TweetDaemon & 
+
+External Scheduling
+——————————————————————
+
+External tools such as cron (http://en.wikipedia.org/wiki/Cron)
+offer much more scheduling flexibility than Clocktwerk's
+approach of simply doing something every n minutes
+or hours. To support use of tools like cron, Clocktwerk
+offers a "single tweet" mode. In single tweet mode, 
+Clocktwerk sends the next tweet and then exits, as opposed
+to running continuously as a daemon.
+
+The single-tweet.sh script launches Clocktwerk in this mode.
+You can schedule this script to run on whatever timetable you
+like, for example to tweet at 12:30, 16:00 and 22:00,
+your crontab would look something like:
+
+    # m h  dom mon dow   command
+    30 12 * * * /opt/clocktwerk-1.2/single-tweet.sh
+    0 16,22 * * * /opt/clocktwerk-1.2/single-tweet.sh
