@@ -47,6 +47,7 @@ public class TweetDaemonTest {
     private Twitter twitterClient;
     private ScheduledExecutorService scheduler;
     private String tweet = "Oranges and lemons";
+    private String twitterUser = "Someone";
     
     @Before
     public void setup() 
@@ -59,7 +60,7 @@ public class TweetDaemonTest {
         
         twitterClient = createStrictMock(Twitter.class);
         twitterClient.getScreenName();
-        expectLastCall().andReturn("someone");
+        expectLastCall().andReturn(twitterUser);
         twitterClient.updateStatus(tweet);
         expectLastCall().andReturn(null);
         replay(twitterClient);
@@ -69,15 +70,7 @@ public class TweetDaemonTest {
     public void schedulesTweetsAtDefaultIntervalIfNotOverridden() {
         
         assertNull( System.getProperty(TWEET_INTERVAL_PROPERTY) );
-        
-        scheduler = 
-            createStrictMock(ScheduledExecutorService.class);
-        scheduler.scheduleAtFixedRate((Runnable)anyObject(), 
-                                    eq(0l), 
-                                    eq(DEFAULT_TWEET_INTERVAL_MILLISECONDS), 
-                                    eq(TimeUnit.MILLISECONDS) );
-        expectLastCall().andReturn(null);
-        replay(scheduler);
+        scheduler = getMockScheduler(DEFAULT_TWEET_INTERVAL_MILLISECONDS);
         
         TweetDaemon tweetDaemon = 
             new TweetDaemon(tweetDatabase, scheduler, twitterClient);
@@ -93,14 +86,7 @@ public class TweetDaemonTest {
         System.setProperty(TWEET_INTERVAL_PROPERTY, "" + randomIntervalMillis);
         
         try {
-            scheduler = 
-                createStrictMock(ScheduledExecutorService.class);
-            scheduler.scheduleAtFixedRate((Runnable)anyObject(), 
-                                        eq(0l), 
-                                        eq(randomIntervalMillis), 
-                                        eq(TimeUnit.MILLISECONDS) );
-            expectLastCall().andReturn(null);
-            replay(scheduler);
+            scheduler = getMockScheduler(randomIntervalMillis);
             
             TweetDaemon tweetDaemon = 
                 new TweetDaemon(tweetDatabase, scheduler, twitterClient);
@@ -142,21 +128,33 @@ public class TweetDaemonTest {
     public void swallowsExceptionsSendingScheduledTweets() 
     throws Exception {
         
-        twitterClient = createStrictMock(Twitter.class);
-        twitterClient.getScreenName();
-        expectLastCall().andReturn("someone");
-        twitterClient.updateStatus(tweet);
-        expectLastCall().andThrow( new TwitterException("BANG!") );
-        replay(twitterClient);
+        twitterClient = 
+            getMockTwitterForException( new TwitterException("BANG!") );
         
         TweetDaemon tweetDaemon = 
                 new TweetDaemon(tweetDatabase, 
                                 new SynchronousScheduler(1), 
                                 twitterClient);
+        tweetDaemon.start();
+        
+        verify(twitterClient);
+    }
+    
+    @Test
+    public void doesNotIncrementTweetCountForFailedScheduledTweet()
+    throws Exception {
+        
+        twitterClient = 
+            getMockTwitterForException( new TwitterException("BANG!") );
+            
+        TweetDaemon tweetDaemon = 
+                new TweetDaemon(tweetDatabase, 
+                        new SynchronousScheduler(1), 
+                        twitterClient);
         assertEquals( 0, tweetDaemon.tweetsPostedSinceStartup() );
         tweetDaemon.start();
         assertEquals( 0, tweetDaemon.tweetsPostedSinceStartup() );
-        
+
         verify(twitterClient);
     }
     
@@ -180,13 +178,7 @@ public class TweetDaemonTest {
     throws Exception {
         
         TwitterException twitterException = new TwitterException("BANG!");
-        
-        twitterClient = createStrictMock(Twitter.class);
-        twitterClient.getScreenName();
-        expectLastCall().andReturn("someone");
-        twitterClient.updateStatus(tweet);
-        expectLastCall().andThrow(twitterException);
-        replay(twitterClient);
+        twitterClient = getMockTwitterForException(twitterException);
         
         TweetDaemon tweetDaemon = 
             new TweetDaemon(tweetDatabase, NULL_SCHEDULER, twitterClient);
@@ -204,6 +196,33 @@ public class TweetDaemonTest {
     ///////////////////////////////////////////////////////
     // helper methods
     ///////////////////////////////////////////////////////
+    
+    private ScheduledExecutorService getMockScheduler(long tweetIntervalMs) {
+        
+        ScheduledExecutorService scheduler = 
+                createStrictMock(ScheduledExecutorService.class);
+        scheduler.scheduleAtFixedRate((Runnable)anyObject(), 
+                                        eq(0L), 
+                                        eq(tweetIntervalMs), 
+                                        eq(TimeUnit.MILLISECONDS) );
+        expectLastCall().andReturn(null);
+        replay(scheduler);
+        
+        return scheduler;
+    }
+    
+    private Twitter getMockTwitterForException(TwitterException exception) 
+    throws Exception {
+        
+        Twitter twitterClient = createStrictMock(Twitter.class);
+        twitterClient.getScreenName();
+        expectLastCall().andReturn(twitterUser);
+        twitterClient.updateStatus(tweet);
+        expectLastCall().andThrow(exception);
+        replay(twitterClient);
+        
+        return twitterClient;
+    }
     
     private class SynchronousScheduler extends ScheduledThreadPoolExecutor {
 

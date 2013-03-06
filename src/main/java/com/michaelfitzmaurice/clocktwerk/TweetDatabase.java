@@ -76,8 +76,7 @@ public class TweetDatabase {
         return tweetList.get( tweetIndex.incrementAndGetIndex() );
     }
     
-    String[] getAllTweets() {
+    public String[] getAllTweets() {
         return tweetList.toArray( new String[ tweetList.size() ] );
     }
-
 }
