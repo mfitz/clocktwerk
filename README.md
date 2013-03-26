@@ -2,9 +2,8 @@ Clocktwerk
 ===========
 
 A Twitterbot that automates the posting
-of Twitter updates at regular intervals. Clocktwerk 
-uses OAuth authentication 
-(see https://dev.twitter.com/docs/auth/oauth/faq), 
+of Twitter updates at regular intervals. Authenticates 
+via OAuth (see https://dev.twitter.com/docs/auth/oauth/faq), 
 hence does not need access to the Twitter login 
 credentials of the account being updated. 
 
@@ -12,7 +11,7 @@ Building
 ===========
 
 Clocktwerk uses Apache Maven (http://maven.apache.org/).
-To compile and build a distro in zip format, use:
+To compile and build a distro in zip format:
 
     mvn clean assembly:assembly 
 
@@ -43,16 +42,16 @@ in order to allow Clocktwerk to authenticate to
 Twitter.
 
 The relavant OAuth credentials are read from 
-a twitter4.properties file on the Java classpath. 
+a `twitter4j.properties` file on the Java classpath. 
 Clocktwerk includes a tool to generate this file for you. 
 Once you have built a distro and unpacked it to your 
-runtime location, you can use the oauth.sh script to 
+runtime location, you can use the `oauth.sh` script to 
 generate this file and drop it onto the classpath; just 
 follow the instructions from the script:
 
     ./oauth.sh [Consumer key] [Consumer secret]
 
-The script will build a twitter4j.properties file that
+The script will build a `twitter4j.properties` file that
 includes the authentication details granted by your 
 Twitter user to your new application. The oauth script
 moves this file into the lib directory, thus placing it
@@ -64,10 +63,10 @@ application.
 Feeding Clocktwerk your tweets
 ===========================
 
-Tweets are pulled from a tweets.txt file on the JVM classpath.
+Tweets are pulled from a `tweets.txt` file on the JVM classpath.
 Once you have prepared your tweets file, dropping it into the
 lib directory is an easy way to place it on the classpath.
-However, as with the twitter4.properties file, you can put
+However, as with the `twitter4j.properties` file, you can put
 his file anywhere you like so long as you modify the JVM
 classpath accordingly.
 
@@ -78,7 +77,7 @@ tweet. When the last tweet from the file has been posted,
 Clocktwerk starts again from the first line, thus it
 will never run out of tweets.
 
-Clocktwerk persists the index into tweets.txt. Hence, when 
+Clocktwerk persists the index into `tweets.txt`. Hence, when 
 you start the application, tweeting continues from the 
 location previously reached, rather than starting again 
 from the beginning of the file.
@@ -102,7 +101,7 @@ every 6 hours, sending the first tweet when the application
 starts up. You can override this default using a Java system 
 property to specify the interval between tweets in milliseconds. 
 For example, to tweet once every 24 hours, you would edit 
-tweet-daemon.sh thus (86400000 being 24 hours expressed
+`tweet-daemon.sh` thus (86400000 being 24 hours expressed
 as milliseconds)
 
     nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmaurice.clocktwerk.apps.Clocktwerk & 
@@ -118,7 +117,7 @@ offers a "single tweet" mode. In single tweet mode,
 Clocktwerk sends the next tweet and then exits, as opposed
 to running continuously as a daemon.
 
-The single-tweet.sh script launches Clocktwerk in this mode.
+The `single-tweet.sh` script launches Clocktwerk in this mode.
 You can schedule this script to run on whatever timetable you
 like, for example to tweet at 12:30, 16:00 and 22:00,
 your crontab would look something like:

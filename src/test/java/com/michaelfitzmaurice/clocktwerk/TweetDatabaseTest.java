@@ -16,6 +16,7 @@
 package com.michaelfitzmaurice.clocktwerk;
 
 import static com.michaelfitzmaurice.clocktwerk.TweetDatabase.MAX_TWEET_LENGTH;
+import static java.util.Arrays.deepEquals;
 import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
@@ -27,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -120,6 +122,22 @@ public class TweetDatabaseTest {
         verify(tweetIndex); 
     }
     
+    @Test
+    public void exposesDefensiveCopyOfTweetList() 
+    throws IOException {
+     
+        TweetDatabase tweetDatabase = new TweetDatabase(tweetFile, tweetIndex);
+        String[] tweetsFromDatabase = tweetDatabase.getAllTweets();
+        String failMsg = 
+            "Tweet list exposed does not match tweet file contents";
+        assertTrue( failMsg, deepEquals(tweets, tweetsFromDatabase) );
+        
+        failMsg = "Tweet list should be immutable externally, but is not";
+        assertFalse( failMsg,
+                    deepEquals(modifiedTweetList(tweetsFromDatabase), 
+                               tweetDatabase.getAllTweets() ) );
+    }
+    
     ///////////////////////////////////////////////////////
     // helper methods
     ///////////////////////////////////////////////////////
@@ -152,5 +170,14 @@ public class TweetDatabaseTest {
         }
         
         return tooLongTweet.toString();
+    }
+    
+    private String[] modifiedTweetList(String[] tweetList) {
+        
+        for (int i = 0; i < tweetList.length; i++) {
+            tweetList[i] = tweetList[i] + "blah";
+        }
+        
+        return tweetList;
     }
 }
