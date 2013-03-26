@@ -95,7 +95,7 @@ limited.
 Internal Scheduling
 -------------------------
 
-You can run Clocktwerk as a deamon process, whereby it will
+You can run Clocktwerk as a daemon process, whereby it will
 run in the background, doing nothing until it is time to
 send the next scheduled tweet. By default, Clocktwerk tweets 
 every 6 hours, sending the first tweet when the application 
