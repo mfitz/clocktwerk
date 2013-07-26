@@ -10,8 +10,8 @@ hence do not need access to Twitter login credentials.
 
 Sample accounts (mostly) driven by Clocktwerk:
 
-https://twitter.com/KevKeeganQuotes (Clocktwerk tweetbot)
-https://twitter.com/Wise8Ball (Clocktwerk reply bot)
+* https://twitter.com/KevKeeganQuotes (Clocktwerk tweetbot)
+* https://twitter.com/Wise8Ball (Clocktwerk reply bot)
 
 Building
 ===========
