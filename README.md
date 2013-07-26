@@ -1,11 +1,17 @@
 Clocktwerk
 ===========
 
-A Twitterbot that automates the posting
-of Twitter updates at regular intervals. Authenticates 
+A collection of small Twitter related applications, including 
+a Twitterbot that automates the posting of updates at 
+regular intervals, and a reply bot that automatically
+responds to mentions. All relevant apps authenticate 
 via OAuth (see https://dev.twitter.com/docs/auth/oauth/faq), 
-hence does not need access to the Twitter login 
-credentials of the account being updated. 
+hence do not need access to Twitter login credentials. 
+
+Sample accounts (mostly) driven by Clocktwerk:
+
+https://twitter.com/KevKeeganQuotes (Clocktwerk tweetbot)
+https://twitter.com/Wise8Ball (Clocktwerk reply bot)
 
 Building
 ===========
@@ -15,15 +21,15 @@ To compile and build a distro in zip format:
 
     mvn clean assembly:assembly 
 
-To generate a test coverage report:
+To run unit tests and generate a test coverage report:
 
     mvn clean cobertura:cobertura
 
 Authentication to Twitter
 ===========================
 
-Clocktwerk uses the Twitter API to send updates. To
-authorise this for the account you
+Clocktwerk uses the Twitter 1.1 API to read and write 
+updates. To authorise this access for the account you
 want to automate, you will need to create a Twitter
 application on the Twitter developer site. Login to
 Twitter as the user that Clocktwerk will be tweeting
@@ -41,13 +47,14 @@ that identifies your app. You will need these values
 in order to allow Clocktwerk to authenticate to 
 Twitter.
 
-The relavant OAuth credentials are read from 
-a `twitter4j.properties` file on the Java classpath. 
-Clocktwerk includes a tool to generate this file for you. 
-Once you have built a distro and unpacked it to your 
-runtime location, you can use the `oauth.sh` script to 
-generate this file and drop it onto the classpath; just 
-follow the instructions from the script:
+The relavant OAuth credentials are read from a
+`twitter4j.properties` file, which can usually be either
+placed on the Java classpath, or passed as a command line
+parameter at runtime. Clocktwerk includes a tool to 
+generate this file for you. Once you have built a distro 
+and unpacked it to your runtime location, you can use the 
+`oauth.sh` script to generate this file and drop it onto 
+the classpath; just follow the instructions from the script:
 
     ./oauth.sh [Consumer key] [Consumer secret]
 
@@ -60,8 +67,14 @@ else you prefer, as long as you add the directory
 to the classpath when you launch the Clocktwerk
 application.
 
-Feeding Clocktwerk your tweets
+Applications within the project
 ===========================
+
+1: Clocktwerk - an automated Tweeter
+===========================
+
+Feeding Clocktwerk your tweets
+---------------------------------------
 
 Tweets are pulled from a `tweets.txt` file on the JVM classpath.
 Once you have prepared your tweets file, dropping it into the
@@ -83,7 +96,7 @@ location previously reached, rather than starting again
 from the beginning of the file.
 
 Tweet Scheduling
-===========================
+---------------------------------------
 
 There are two ways to schedule your tweets: internally 
 to Clocktwerk, or externally using some additional tool.
@@ -91,10 +104,9 @@ External scheduling usually offers a lot more flexibility;
 Clocktwerk's internal scheduling is fairly crude and 
 limited.
 
-Internal Scheduling
--------------------------
-
-You can run Clocktwerk as a daemon process, whereby it will
+<dl>
+  <dt>Internal Scheduling</dt>
+  <dd>You can run Clocktwerk as a daemon process, whereby it will
 run in the background, doing nothing until it is time to
 send the next scheduled tweet. By default, Clocktwerk tweets 
 every 6 hours, sending the first tweet when the application 
@@ -104,12 +116,10 @@ For example, to tweet once every 24 hours, you would edit
 `tweet-daemon.sh` thus (86400000 being 24 hours expressed
 as milliseconds)
 
-    nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmaurice.clocktwerk.apps.Clocktwerk & 
-
-External Scheduling
--------------------------
-
-External tools such as cron (http://en.wikipedia.org/wiki/Cron)
+    nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmaurice.clocktwerk.apps.Clocktwerk &
+  </dd>
+  <dt>External Scheduling (preferred)</dt>
+  <dd>External tools such as cron (http://en.wikipedia.org/wiki/Cron)
 offer much more scheduling flexibility than Clocktwerk's
 approach of simply doing something every n minutes
 or hours. To support use of tools like cron, Clocktwerk
@@ -124,4 +134,10 @@ your crontab would look something like:
 
     # m h  dom mon dow   command
     30 12 * * * /opt/clocktwerk-1.2/single-tweet.sh
-    0 16,22 * * * /opt/clocktwerk-1.2/single-tweet.sh
+    0 16,22 * * * /opt/clocktwerk-1.2/single-tweet.sh</dd>
+</dl>
+
+2: RandomReplyBot - An autoresponder for Twitter mentions
+===========================
+
+
