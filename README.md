@@ -67,10 +67,8 @@ else you prefer, as long as you add the directory
 to the classpath when you launch the Clocktwerk
 application.
 
-Applications within the project
-===========================
 
-1: Clocktwerk - an automated Tweeter
+Clocktwerk - an automated Tweeter
 ===========================
 
 Feeding Clocktwerk your tweets
@@ -106,7 +104,8 @@ limited.
 
 <dl>
   <dt>Internal Scheduling</dt>
-  <dd>You can run Clocktwerk as a daemon process, whereby it will
+</dl>
+You can run Clocktwerk as a daemon process, whereby it will
 run in the background, doing nothing until it is time to
 send the next scheduled tweet. By default, Clocktwerk tweets 
 every 6 hours, sending the first tweet when the application 
@@ -117,9 +116,11 @@ For example, to tweet once every 24 hours, you would edit
 as milliseconds)
 
     nohup java -classpath lib:lib/* -Dtweetdaemon.tweetinterval.milliseconds=86400000 com.michaelfitzmaurice.clocktwerk.apps.Clocktwerk &
-  </dd>
+
+<dl>
   <dt>External Scheduling (preferred)</dt>
-  <dd>External tools such as cron (http://en.wikipedia.org/wiki/Cron)
+</dl>
+External tools such as cron (http://en.wikipedia.org/wiki/Cron)
 offer much more scheduling flexibility than Clocktwerk's
 approach of simply doing something every n minutes
 or hours. To support use of tools like cron, Clocktwerk
@@ -134,10 +135,9 @@ your crontab would look something like:
 
     # m h  dom mon dow   command
     30 12 * * * /opt/clocktwerk-1.2/single-tweet.sh
-    0 16,22 * * * /opt/clocktwerk-1.2/single-tweet.sh</dd>
-</dl>
+    0 16,22 * * * /opt/clocktwerk-1.2/single-tweet.sh
 
-2: RandomReplyBot - An autoresponder for Twitter mentions
+RandomReplyBot - An autoresponder for Twitter mentions
 ===========================
 
 
