@@ -68,7 +68,7 @@ to the classpath when you launch the Clocktwerk
 application.
 
 
-Clocktwerk - an automated Tweeter
+Clocktwerk - automated tweets
 ===========================
 
 Feeding Clocktwerk your tweets
@@ -137,7 +137,7 @@ your crontab would look something like:
     30 12 * * * /opt/clocktwerk-1.2/single-tweet.sh
     0 16,22 * * * /opt/clocktwerk-1.2/single-tweet.sh
 
-RandomReplyBot - An autoresponder for Twitter mentions
+RandomReplyBot - autoresponding to mentions
 ===========================
 
 
