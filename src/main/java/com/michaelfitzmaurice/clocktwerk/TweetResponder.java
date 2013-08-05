@@ -30,6 +30,7 @@ import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
+import twitter4j.UserMentionEntity;
 
 import com.michaelfitzmaurice.clocktwerk.prevayler.QueryLastMentionHandledId;
 import com.michaelfitzmaurice.clocktwerk.prevayler.SetLastMentionHandledIdTransaction;
@@ -45,33 +46,26 @@ public class TweetResponder {
     private final Prevayler prevayler;
     private final Twitter twitterClient;
     private final TweetDatabase tweetDatabase;
+    private final String myScreenName;
 
     public TweetResponder(Prevayler prevayler, 
                             TweetDatabase tweetDatabase,
-                            Twitter twitterClient) {
+                            Twitter twitterClient) 
+    throws TweetException {
         
         this.prevayler = prevayler;
         this.twitterClient = twitterClient;
         this.tweetDatabase = tweetDatabase;
+        this.myScreenName = myScreenName();
     }
     
     public Collection<Status> getNewMentions() 
     throws TweetException {
         
-        long sinceId = 0;
+        long sinceId = lastSeenMention();
         try {
-            Long lastHandledMentionId = 
-                (Long)prevayler.execute( new QueryLastMentionHandledId() );
-            sinceId = lastHandledMentionId.longValue();
-        } catch (Exception e) {
-            throw new TweetException("Unable to read last handled mention ID", 
-                                    e);
-        }
-        
-        try {
-            String screenName = twitterClient.getScreenName();
             LOG.info("Checking for new Twitter mentions of {} since Tweet {}", 
-                        screenName, 
+                        myScreenName, 
                         sinceId);
             Paging paging = new Paging(sinceId);
             ResponseList<Status> mentions = 
@@ -96,24 +90,19 @@ public class TweetResponder {
       
         // TODO handle paging
     }
-    
+
     public void respondToMentions(Collection<Status> mentions) {
         
-        try {
-            String screenName = twitterClient.getScreenName();
-            LOG.info("Responding to {} mentions on behalf of {}", 
-                    mentions.size(),    
-                    screenName);
-        } catch (TwitterException e) {
-            LOG.error("Error getting authenticated user's screen name", e);
-        }
+        LOG.info("Responding to {} mentions on behalf of {}", 
+                    mentions.size(), 
+                    myScreenName);
         
         long latestMentionSeen = -1;
-        
         for (Status mention : mentions) {
-            String userToAddress = mention.getUser().getScreenName();
             String replyMessage = 
-                "@" + userToAddress + " " + tweetDatabase.getNextTweet();
+                replyBody( myScreenName, 
+                            mention, 
+                            tweetDatabase.getNextTweet() );
             StatusUpdate reply = new StatusUpdate(replyMessage);
             long mentionTweetId = mention.getId();
             reply.setInReplyToStatusId(mentionTweetId);
@@ -121,7 +110,6 @@ public class TweetResponder {
             try {
                 twitterClient.updateStatus(reply);
                 LOG.debug("Replied to mention with ID {}", mentionTweetId);
-                // :TODO update "most recent mention replied to"
             } catch (TwitterException e) {
                 LOG.error("Failed to reply to Tweet", e);
             }
@@ -131,14 +119,55 @@ public class TweetResponder {
             }
         }
         LOG.info("Finished replying to new mentions");
+        updateLastMentionSeen(latestMentionSeen);
+    }
+
+    private void updateLastMentionSeen(long latestMentionSeen) {
         
         if (latestMentionSeen != -1) {
             prevayler.execute( new SetLastMentionHandledIdTransaction(
                                                         latestMentionSeen) );
-            LOG.info("Updating latest mention seen to ID {}", 
-                        latestMentionSeen);
+            LOG.info("Updated latest mention seen to {}", latestMentionSeen);
         }
+    }
+
+    private String replyBody(String myScreenName, 
+                            Status mention, 
+                            String messageBody) {
         
+        String replyMessage = "@" + mention.getUser().getScreenName() + " ";
+        for ( UserMentionEntity userMentionEntity : 
+                        mention.getUserMentionEntities() ) {
+            String mentionScreenName = userMentionEntity.getScreenName();
+            if (mentionScreenName.equalsIgnoreCase(myScreenName) == false) {
+                replyMessage += "@" + mentionScreenName + " ";                    
+            }
+        }
+        replyMessage += messageBody;
+        
+        return replyMessage;
+    }
+
+    private String myScreenName() throws TweetException {
+        
+        try {
+            return twitterClient.getScreenName();
+        } catch (TwitterException e) {
+            throw new TweetException(
+                "Error getting authenticated user's screenname", e);
+        }
+    }
+    
+    private long lastSeenMention() throws TweetException {
+        
+        try {
+            Long lastHandledMentionId = 
+                (Long)prevayler.execute( new QueryLastMentionHandledId() );
+            return lastHandledMentionId.longValue();
+        } catch (Exception e) {
+            throw new TweetException("Unable to read last handled mention ID", 
+                                    e);
+        }
     }
 
 }

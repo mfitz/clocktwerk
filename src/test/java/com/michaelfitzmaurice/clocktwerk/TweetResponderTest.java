@@ -28,15 +28,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.easymock.IArgumentMatcher;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.prevayler.Prevayler;
@@ -62,19 +68,21 @@ import com.michaelfitzmaurice.clocktwerk.prevayler.SetLastMentionHandledIdTransa
 
 public class TweetResponderTest {
     
+    private File persistenceDir;
     private Prevayler prevayler;
     private Long lastSeenMentionId;
     private Twitter mockTwitterClient;
     private TweetDatabase mockTweetDb;
     private Paging paging;
-    private String twitterUser = "Someone";
+    private User twitterUser;
     private String replyText = 
         "We have received your query - it's in a MAHOOSIVE queue...";
+    private User mentioningUser;
     
     @Before
     public void setup() throws Exception {
         
-        File persistenceDir = 
+        persistenceDir = 
             new File(System.getProperty("java.io.tmpdir"), "test-prevayler");
         FileUtils.forceMkdir(persistenceDir);
         FileUtils.forceDeleteOnExit(persistenceDir);
@@ -90,6 +98,25 @@ public class TweetResponderTest {
         mockTweetDb.getNextTweet();
         expectLastCall().andReturn(replyText).anyTimes();
         replay(mockTweetDb);
+        
+        String twitterUserHandle = "Receiver";
+        twitterUser = userFrom("Mr. " + twitterUserHandle, twitterUserHandle);
+        
+        String mentionerHandle = "MentionU";
+        mentioningUser = userFrom("Miss " + mentionerHandle, mentionerHandle);
+        
+        mockTwitterClient = createStrictMock(Twitter.class);
+        mockTwitterClient.getScreenName();
+        expectLastCall().andReturn(twitterUserHandle);
+        replay(mockTwitterClient);
+    }
+    
+    @After
+    public void tearDown() throws IOException {
+        
+        if ( persistenceDir.exists() ) {
+            FileUtils.deleteDirectory(persistenceDir);
+        }
     }
     
     @Test (expected = TweetException.class)
@@ -104,7 +131,7 @@ public class TweetResponderTest {
         replay(mockPrevayler);
         
         TweetResponder responder = 
-            new TweetResponder(mockPrevayler, null, null);
+            new TweetResponder(mockPrevayler, null, mockTwitterClient);
         try {
             responder.getNewMentions();
         } catch (TweetException e) {
@@ -123,10 +150,9 @@ public class TweetResponderTest {
         expectLastCall().andThrow(twitterException);
         replay(mockTwitterClient);
         
-        TweetResponder responder = 
-                new TweetResponder(prevayler, null, mockTwitterClient);
+                
         try {
-            responder.getNewMentions();
+            new TweetResponder(prevayler, null, mockTwitterClient);
         } catch (TweetException e) {
             assertSame( twitterException, e.getCause() );
             throw e;
@@ -139,7 +165,7 @@ public class TweetResponderTest {
         
         mockTwitterClient = createStrictMock(Twitter.class);
         mockTwitterClient.getScreenName();
-        expectLastCall().andReturn( randomString() );
+        expectLastCall().andReturn( twitterUser.getScreenName() );
         mockTwitterClient.getMentionsTimeline(paging);
         expectLastCall().andReturn( aResponseList().build() );
         replay(mockTwitterClient);
@@ -166,7 +192,7 @@ public class TweetResponderTest {
         
         mockTwitterClient = createStrictMock(Twitter.class);
         mockTwitterClient.getScreenName();
-        expectLastCall().andReturn(twitterUser);
+        expectLastCall().andReturn( twitterUser.getScreenName() );
         mockTwitterClient.getMentionsTimeline(paging);
         expectLastCall().andReturn(mentions);
         replay(mockTwitterClient);
@@ -177,21 +203,28 @@ public class TweetResponderTest {
         assertEquals(mentions, returnedMentions);
     }
     
-    @Test
-    public void swallowsExceptionGettingScreenNameWhenReplyingToMentions()
+    @Test (expected = TweetException.class)
+    public void wrapsExceptionGettingNewMentions()
     throws Exception {
         
         TwitterException twitterException = new TwitterException("POW!");
         mockTwitterClient = createStrictMock(Twitter.class);
         mockTwitterClient.getScreenName();
+        expectLastCall().andReturn( mentioningUser.getScreenName() );
+        mockTwitterClient.getMentionsTimeline(paging);
         expectLastCall().andThrow(twitterException);
         replay(mockTwitterClient);
         
         TweetResponder responder = 
                 new TweetResponder(prevayler, null, mockTwitterClient);
-        responder.respondToMentions( aResponseList().build() );
-        
-        verify(mockTwitterClient);
+        try {
+            responder.getNewMentions();
+        } catch (TweetException e) {
+            assertSame( twitterException, e.getCause() );
+            throw e;
+        } finally {
+            verify(mockTwitterClient);
+        }
     }
     
     @Test
@@ -200,7 +233,7 @@ public class TweetResponderTest {
         
         mockTwitterClient = createNiceMock(Twitter.class);
         mockTwitterClient.getScreenName();
-        expectLastCall().andReturn(twitterUser);
+        expectLastCall().andReturn( twitterUser.getScreenName() );
         mockTwitterClient.updateStatus( (StatusUpdate)anyObject() );
         expectLastCall().andReturn(null);
         replay(mockTwitterClient);
@@ -219,21 +252,13 @@ public class TweetResponderTest {
     public void postsUpdatesInReplyToMentions()
     throws Exception {
   
-        User userWhoMentioned = randomUser();
-        String bodyOfMentioningTweet = randomTweetBody();
         long idOfMention = lastSeenMentionId.longValue() + 1; 
-        Status mention = 
-            statusFrom(userWhoMentioned, 
-                        idOfMention, 
-                        bodyOfMentioningTweet);
-        ResponseList<Status> mentions = 
-            aResponseList().withStatus(mention).build();
         
         mockTwitterClient = createStrictMock(Twitter.class);
         mockTwitterClient.getScreenName();
-        expectLastCall().andReturn(twitterUser);
+        expectLastCall().andReturn( twitterUser.getScreenName() );
         mockTwitterClient.updateStatus( 
-            replyUpdateFor(userWhoMentioned.getScreenName(), 
+            replyUpdateFor( new User[] {},
                             idOfMention, 
                             replyText) );
         expectLastCall().andReturn(null);
@@ -241,7 +266,41 @@ public class TweetResponderTest {
         
         TweetResponder responder = 
                 new TweetResponder(prevayler, mockTweetDb, mockTwitterClient);
-        responder.respondToMentions(mentions);
+        Status mention = 
+                statusFrom(mentioningUser, 
+                            idOfMention, 
+                            randomTweetBody() );
+        responder.respondToMentions(
+                aResponseList().withStatus(mention).build() );
+        
+        verify(mockTwitterClient);
+    }
+    
+    @Test
+    public void copiesAllMentionedUsersIntoReply()
+    throws Exception {
+        
+        long idOfMention = lastSeenMentionId.longValue() + 1; 
+        User[] mentioned = mentionedUsers(twitterUser, 3);
+        
+        mockTwitterClient = createStrictMock(Twitter.class);
+        mockTwitterClient.getScreenName();
+        expectLastCall().andReturn( twitterUser.getScreenName() );
+        mockTwitterClient.updateStatus(
+                replyUpdateFor( mentioned,
+                                idOfMention, 
+                                replyText) );
+        expectLastCall().andReturn(null);
+        replay(mockTwitterClient);
+        
+        TweetResponder responder = 
+                new TweetResponder(prevayler, mockTweetDb, mockTwitterClient);
+        Status mention = 
+                statusFrom(mentioningUser, 
+                            idOfMention, 
+                            tweetBodyWithMentions(mentioned) );
+        responder.respondToMentions(
+            aResponseList().withStatus(mention).build() );
         
         verify(mockTwitterClient);
     }
@@ -253,7 +312,7 @@ public class TweetResponderTest {
         TwitterException exception = new TwitterException("BOOM!");
         mockTwitterClient = createStrictMock(Twitter.class);
         mockTwitterClient.getScreenName();
-        expectLastCall().andReturn(twitterUser);
+        expectLastCall().andReturn( twitterUser.getScreenName() );
         mockTwitterClient.updateStatus( (StatusUpdate)anyObject() );
         expectLastCall().andThrow(exception);
         replay(mockTwitterClient);
@@ -276,7 +335,7 @@ public class TweetResponderTest {
         
         mockTwitterClient = createNiceMock(Twitter.class);
         mockTwitterClient.getScreenName();
-        expectLastCall().andReturn(twitterUser);
+        expectLastCall().andReturn( twitterUser.getScreenName() );
         replay(mockTwitterClient);
         
         Prevayler mockPrevayler = createStrictMock(Prevayler.class);
@@ -307,7 +366,7 @@ public class TweetResponderTest {
         
         mockTwitterClient = createNiceMock(Twitter.class);
         mockTwitterClient.getScreenName();
-        expectLastCall().andReturn(twitterUser);
+        expectLastCall().andReturn( twitterUser.getScreenName() );
         mockTwitterClient.updateStatus( (StatusUpdate)anyObject() );
         expectLastCall().andReturn(null);
         replay(mockTwitterClient);
@@ -329,11 +388,20 @@ public class TweetResponderTest {
     // helper methods
     ///////////////////////////////////////////////////////
     
-    private StatusUpdate replyUpdateFor(String userWhoMentioned, 
+    private StatusUpdate replyUpdateFor(User[] usersMentioned,
                                         long idOfMention, 
                                         String replyBody) {
         
-        String fullReplyTweet = "@" + userWhoMentioned + " " + replyBody;
+        String fullReplyTweet = "@" + mentioningUser.getScreenName() + " ";
+        for (User user : usersMentioned) {
+            String userScreenName = user.getScreenName();
+            if ( userScreenName.equalsIgnoreCase( twitterUser.getScreenName() ) 
+                    == false) {
+                fullReplyTweet += "@" + userScreenName + " ";    
+            }
+            
+        }
+        fullReplyTweet += replyBody;
         StatusUpdate replyStatus = new StatusUpdate(fullReplyTweet);
         replyStatus.setInReplyToStatusId(idOfMention);
         
@@ -345,7 +413,30 @@ public class TweetResponderTest {
     }
     
     private User randomUser() {
-        return userFrom( randomString(), randomString() );
+        return userFrom( randomString(), randomString().substring(0, 8) );
+    }
+    
+    private User[] randomUsers(int numberOfUsers) {
+        
+        User[] users = new User[numberOfUsers];
+        for (int i = 0; i < numberOfUsers; i++) {
+            String twitterHandle = "RandomU" + i;
+            users[i] = userFrom( "Mr. " + twitterHandle, twitterHandle);
+        }
+        
+        return users;
+    }
+    
+    private User[] mentionedUsers(User addressee, 
+                                    int numberOfRandomMentionedUsers) {
+        
+        User[] randoms = randomUsers(numberOfRandomMentionedUsers);
+        User[] usersWhoWereMentioned = 
+            new User[numberOfRandomMentionedUsers + 1];
+        usersWhoWereMentioned[0] = addressee;
+        System.arraycopy(randoms, 0, usersWhoWereMentioned, 1, randoms.length);
+        
+        return usersWhoWereMentioned;
     }
     
     private String randomTweetBody() {
@@ -353,6 +444,15 @@ public class TweetResponderTest {
                 + randomString() + " "
                 + randomString() + " "
                 + randomString();
+    }
+    
+    private String tweetBodyWithMentions(User[] usersMentioned) {
+        String tweetBody = "";
+        for (User user : usersMentioned) {
+            tweetBody += "@" + user.getScreenName() + " ";
+        }
+        
+        return tweetBody;
     }
     
     @SuppressWarnings("serial")
@@ -689,8 +789,20 @@ public class TweetResponderTest {
             
             @Override
             public UserMentionEntity[] getUserMentionEntities() {
-                // TODO Auto-generated method stub
-                return null;
+                List<UserMentionEntity> userMentionEntities = 
+                        new ArrayList<UserMentionEntity>();
+//                userMentionEntities.add( userMentionEntity( user.getScreenName() ) );
+                
+                Pattern p = Pattern.compile("@\\w{8}");
+                Matcher m = p.matcher(statusBody);
+                while ( m.find() ) {
+                    final String tweetHandle = m.group().substring(1);
+                    userMentionEntities.add( userMentionEntity(tweetHandle) );
+                }
+                
+                UserMentionEntity[] mentionEntities = 
+                    new UserMentionEntity[userMentionEntities.size()];
+                return userMentionEntities.toArray(mentionEntities);
             }
             
             @Override
@@ -841,6 +953,41 @@ public class TweetResponderTest {
         };
     }
     
+    @SuppressWarnings("serial")
+    private UserMentionEntity userMentionEntity(final String tweetHandle) {
+        return new UserMentionEntity() {
+            
+            @Override
+            public int getStart() {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+            
+            @Override
+            public String getScreenName() {
+                return tweetHandle;
+            }
+            
+            @Override
+            public String getName() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public long getId() {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+            
+            @Override
+            public int getEnd() {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+        };
+    }
+
     // custom Matcher for command object passed to Prevayler
     public static SetLastMentionHandledIdTransaction 
         eqSetLastMentionHandledIdTransaction(
