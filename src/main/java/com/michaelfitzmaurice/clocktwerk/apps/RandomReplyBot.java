@@ -35,7 +35,6 @@ import twitter4j.conf.ConfigurationBuilder;
 
 import com.michaelfitzmaurice.clocktwerk.RandomTweetIndex;
 import com.michaelfitzmaurice.clocktwerk.TweetDatabase;
-import com.michaelfitzmaurice.clocktwerk.TweetException;
 import com.michaelfitzmaurice.clocktwerk.TweetResponder;
 
 /**
@@ -54,12 +53,10 @@ public class RandomReplyBot {
 
     /**
      * @param args
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * @throws TweetException 
+     * @throws Exception 
      */
     public static void main(String[] args) 
-    throws IOException, ClassNotFoundException, TweetException {
+    throws Exception {
         
         if (args.length < 3) {
             String msg = 
