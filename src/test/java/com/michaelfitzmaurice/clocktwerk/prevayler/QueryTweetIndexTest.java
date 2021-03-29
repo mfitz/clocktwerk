@@ -17,6 +17,7 @@ package com.michaelfitzmaurice.clocktwerk.prevayler;
 
 import static com.michaelfitzmaurice.clocktwerk.prevayler.PrevaylentTweetIndex.INDEX_KEY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,9 +34,8 @@ public class QueryTweetIndexTest {
         try {
             new QueryTweetIndex().query(new HashSet<String>(), null);
         } catch (ClassCastException e) {
-            String expectedMsg = 
-                "java.util.HashSet cannot be cast to java.util.HashMap";
-            assertEquals( expectedMsg, e.getMessage() );
+            String expectedMsg = "java.util.HashSet cannot be cast to";
+            assertTrue( e.getMessage().contains(expectedMsg) );
             throw e;
         }
     }

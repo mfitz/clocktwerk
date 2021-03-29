@@ -11,3 +11,5 @@ PrevalenceBase/
 *.jar
 *.war
 *.ear
+.idea/
+clocktwerk.iml

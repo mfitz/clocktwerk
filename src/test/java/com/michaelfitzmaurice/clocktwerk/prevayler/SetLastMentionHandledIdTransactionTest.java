@@ -18,6 +18,7 @@ package com.michaelfitzmaurice.clocktwerk.prevayler;
 import static com.michaelfitzmaurice.clocktwerk.TweetResponder.LAST_MENTION_HANDLED_ID_KEY;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -47,9 +48,8 @@ public class SetLastMentionHandledIdTransactionTest {
         try {
             transaction.executeOn(new HashSet<String>(), ignoreDate);
         } catch (ClassCastException e) {
-            String expectedMsg = 
-                "java.util.HashSet cannot be cast to java.util.HashMap";
-            assertEquals( expectedMsg, e.getMessage() );
+            String expectedMsg = "java.util.HashSet cannot be cast to";
+            assertTrue( e.getMessage().contains(expectedMsg) );
             throw e;
         }
     }

@@ -18,6 +18,7 @@ package com.michaelfitzmaurice.clocktwerk.prevayler;
 import static com.michaelfitzmaurice.clocktwerk.prevayler.PrevaylentTweetIndex.INDEX_KEY;
 import static com.michaelfitzmaurice.clocktwerk.prevayler.PrevaylentTweetIndex.NUMBER_OF_TWEETS_KEY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -33,15 +34,13 @@ public class IncrementAndGetTweetIndexTransactionTest {
     @Test (expected = ClassCastException.class)
     public void rejectsPrevaylentSystemIfNotAHashMap() 
     throws Exception {
-         
-        IncrementAndGetTweetIndexTransaction transaction = 
+        IncrementAndGetTweetIndexTransaction transaction =
                 new IncrementAndGetTweetIndexTransaction();
         try {
             transaction.executeAndQuery(new HashSet<String>(), NULL_DATE);
         } catch (ClassCastException e) {
-            String expectedMsg = 
-                "java.util.HashSet cannot be cast to java.util.HashMap";
-            assertEquals( expectedMsg, e.getMessage() );
+            String expectedMsg = "java.util.HashSet cannot be cast to";
+            assertTrue( e.getMessage().contains(expectedMsg) );
             throw e;
         }
     }

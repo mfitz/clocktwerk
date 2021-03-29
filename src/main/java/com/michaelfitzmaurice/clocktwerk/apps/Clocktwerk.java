@@ -36,23 +36,14 @@ import twitter4j.TwitterFactory;
 
 public class Clocktwerk {
     
-    private static final String SINGLE_TWEET_MODE_PROPERTY =
-            "com.michaelfitzmaurice.clocktwerk.single-tweet-mode";
-    
+    private static final String SINGLE_TWEET_MODE_PROPERTY = "com.michaelfitzmaurice.clocktwerk.single-tweet-mode";
+
     private static final transient Logger LOG = 
             LoggerFactory.getLogger(Clocktwerk.class);
     
     public static void main(String[] args) throws Exception {
-        
-        // TODO - make tweet file location a sys prop/command line arg
-        LOG.info("Looking for tweets file...");
-        URL tweetFileUrl = 
-                new Object().getClass().getResource("/tweets.txt");
-        if (tweetFileUrl == null) {
-            throw new IOException("No tweets.txt file found on the classpath");
-        }
-        LOG.info("Found tweets file at {}", tweetFileUrl);
-        File tweetFile = new File( tweetFileUrl.getPath() );
+        File tweetFile = new File(args[0]);
+        LOG.info("Tweeting from {}", tweetFile);
         
         // TODO - make prevayler dir a sys prop/command line arg
         Prevayler prevayler = 
@@ -72,15 +63,11 @@ public class Clocktwerk {
             throw new IOException(msg);
         }
         LOG.info("Twitter client connected and authenticated");
-        
-        boolean singleTweetMode = 
-            Boolean.getBoolean(SINGLE_TWEET_MODE_PROPERTY);
-        
+
         TweetDaemon tweetDaemon = null;
-        if (singleTweetMode) {
+        if (Boolean.getBoolean(SINGLE_TWEET_MODE_PROPERTY)) {
             LOG.info("Using single tweet mode....");
-            tweetDaemon = 
-                    new TweetDaemon(tweetDatabase, null, twitter);
+            tweetDaemon = new TweetDaemon(tweetDatabase, null, twitter);
             tweetDaemon.sendNextTweet();
             LOG.info("Sent next tweet - exiting...");
         } else {
@@ -93,5 +80,4 @@ public class Clocktwerk {
             LOG.info("Started tweet daemon");
         }
     }
-
 }
