@@ -37,4 +37,4 @@ jobs:
         export ACCEPT_EULA=Y
         sudo apt-get update
         sudo apt-get install -y postgresql
-        psql --dbname=postgres --command "SELECT * FROM information_schema.tables"
+        psql --dbname=postgres --host localhost --port 5432 --command "SELECT * FROM information_schema.tables"
