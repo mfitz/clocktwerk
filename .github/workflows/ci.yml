@@ -31,7 +31,6 @@ jobs:
 
     - name: Verify with Maven
       run: |
-        echo "Postgres DB is" $POSTGRES_DB
-        echo "Postgres User is" $POSTGRES_USER
-        echo "Postgres PW is" $POSTGRES_PASSWORD
-        telnet localhost 5432
+        echo "Postgres DB is $POSTGRES_DB"
+        echo "Postgres User is $POSTGRES_USER"
+        echo "Postgres PW is $POSTGRES_PASSWORD"
