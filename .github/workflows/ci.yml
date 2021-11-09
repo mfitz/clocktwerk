@@ -30,10 +30,13 @@ jobs:
 
 
     - name: Verify with Maven
+      env:
+        PGPASSWORD: test
+        PGUSER: root
       run: |
         echo "Postgres DB is $POSTGRES_DB"
-        echo "Postgres User is $POSTGRES_USER"
-        echo "Postgres PW is $POSTGRES_PASSWORD"
+        echo "Postgres User is $PGUSER"
+        echo "Postgres PW is $PGPASSWORD"
         export ACCEPT_EULA=Y
         sudo apt-get update
         sudo apt-get install -y postgresql
