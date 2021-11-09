@@ -34,3 +34,7 @@ jobs:
         echo "Postgres DB is $POSTGRES_DB"
         echo "Postgres User is $POSTGRES_USER"
         echo "Postgres PW is $POSTGRES_PASSWORD"
+        export ACCEPT_EULA=Y
+        sudo apt-get update
+        sudo apt-get install -y postgresql
+        psql --dbname=postgres --command "SELECT * FROM information_schema.tables"
